@@ -79,50 +79,5 @@ class Instapaper {
   }
 }
 
-//   async fetchArchivedBookmarks() {
-//     let existingBookmarks = '';
-//     const bookmarkCacheIds = Object.keys(this.bookmarksCache);
-//     if (bookmarkCacheIds.length > 0) {
-//       existingBookmarks = bookmarkCacheIds.join(',');
-//     }
-//     const newBookmarks = (await this._request('/api/1/bookmarks/list',
-//       {
-//         folder_id: 'archive',
-//         have: existingBookmarks
-//       }
-//     ));
-//     newBookmarks.data.forEach(bm => {
-//       if (bm.bookmark_id != undefined) {
-//         this.bookmarksCache[bm.bookmark_id] = bm;
-//       }
-//     });
-//     return this.bookmarksCache;
-//   }
-
-//   async fetchAllHighlights() {
-//     const archivedBookmarkIds = Object.keys(await this.fetchArchivedBookmarks());
-//     const highlightRequests = archivedBookmarkIds.map(id => this._request(`/api/1.1/bookmarks/${id}/highlights`));
-//     const highlights = await Promise.all(highlightRequests);
-
-//     return highlights.reduce((array, highlight) => {
-//       const highlights = highlight.data;
-//       if (highlights.length > 0) {
-//         const bookmarkId = highlights[0].bookmark_id;
-//         const bookmarkAndHighlights = {
-//           title: this.bookmarksCache[bookmarkId].title,
-//           url: this.bookmarksCache[bookmarkId].url,
-//           highlights: highlights.map(hl => (
-//             {
-//               text: hl.text.replace(/\n/g, ''),
-//               time: (new Date(hl.time * 1000)).toLocaleString('en-GB')
-//             }
-//           )),
-//         };
-//         return [...array, bookmarkAndHighlights]
-//       }
-//       return [...array]
-//     }, []);
-//   }
-// }
 
 module.exports = Instapaper;

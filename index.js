@@ -1,18 +1,14 @@
 const instapaper = require('./instapaper')
 const express = require('express');
-const app = express();
+const cors = require('cors')
 const url = require("url");
+const app = express();
 
+app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-app.get('/', (req, res) => {
-  res.send('Roam42 SmartBlock gateway between Roam and InstaPaper')
-});
-
-app.get('/test', function(request,response){
-	response.send({test: 'Server running' })
-})
+app.use(express.static('public')); 
 
 app.get('/gettoken', async function(request,response){
 	const client = new instapaper(process.env.CONSUMER_KEY, process.env.CONSUMER_SECRET);
@@ -34,7 +30,7 @@ app.get('/unread', async function(request,response){
 	const params = url.parse(request.url,true).query;
 	const client = await configClient(params);
 	const rawResults = await client._request('/api/1/bookmarks/list', {folder_id: 'unread'} );
-	let results = rawResults.data.map(r => r);
+	let results = rawResults.data.filter(r =>{ if(r.bookmark_id) return r} );
 	response.send(results);
 })
 
@@ -54,6 +50,16 @@ app.get('/highlights', async function(request,response){
 		response.send('missing parameter id');
 	}
 })
+
+app.get('/addlink', async function(request,response){
+	const params = url.parse(request.url,true).query;
+	console.log(params)
+	const client = await configClient(params);
+	const rawResults = await client._request('/api/1/bookmarks/add', {url: params.url } );
+	response.send(rawResults);
+})
+
+
 
 
 app.listen(3000, () => {

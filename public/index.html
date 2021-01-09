@@ -1,0 +1,106 @@
+<html>
+<head>
+	<link rel=stylesheet href=https://cdn.jsdelivr.net/npm/pretty-print-json@0.4/dist/pretty-print-json.css>
+	<script src=https://cdn.jsdelivr.net/npm/pretty-print-json@0.4/dist/pretty-print-json.min.js></script>
+</head>		
+<body>
+	<b>Roam42 SmartBlock gateway between Roam and Instapaper</b>
+	<p>URL<p><ul><li>https://InstapaperRoamGateway.roamhacker.repl.co</li></ul> 
+
+	<p>All endpoints require parameters on the URL<p>
+	<ul>
+		<li><label>username:</label> <input id="username" onkeyup="updateUserCredentials()"></li>
+		<li><label>password:</label> <input id="password" type="password" onkeyup="updateUserCredentials()"></li>
+	</ul> 
+	<p>End points:</p>
+	<ul>
+		<li><b>/unread</b> - returns list of unread articles</li>
+		<ul>
+			<li>no additional parameters requried</li>
+			<li>Example: https://instapaperroamgateway.roamhacker.repl.co/unread?username=name&password=pwd <img src="arrow.png" height=14px onclick="runAPI('unread')"><pre id='unread'></pre></li>
+		</ul>
+	</ul>
+	<ul>
+		<li><b>/highlights</b> - returns highligths from a specific article (bookmark)</li>
+		<ul>
+		<li><label>Bookmark ID:</label> <input id="highlightsBookMarkID"></li>
+			<li>Example: https://instapaperroamgateway.roamhacker.repl.co/highlights?id=1376227132&username=name&password=pwd  <img src="arrow.png" height=14px onclick="runAPI('highlights')"><pre id='highlights'></pre></li>
+		</ul>
+	</ul>
+	<ul>
+		<li><b>/addlink</b> - adds article to be read to Instapaper</li>
+		<ul>
+		<li><label>URL to article:</label> <input id="addlinkarticleurl" size="80"></li>
+			<li>Example: https://instapaperroamgateway.roamhacker.repl.co/addlink?url=urladdress&username=name&password=pwd  <img src="arrow.png" height=14px onclick="runAPI('addlink')"><pre id='addlink'></pre></li>
+		</ul>
+	</ul>
+
+	<script>
+		const runAPI = (apiName)=> {
+			if(document.getElementById('username').value.trim() == '' || document.getElementById('password').value.trim() == '') {
+				alert('please provide a user name and password');
+				return;
+			} 
+			var baseUrl = window.location.origin + '/';
+			switch(apiName){
+				case 'unread':
+				  baseUrl += 'unread?';
+					break;
+				case 'highlights':
+					if(document.getElementById('highlightsBookMarkID').value.trim() == '') {
+						alert('Please provide a bookmark id to be used with highlights');
+						return;
+					}				
+				  baseUrl += 'highlights?id=' + document.getElementById('highlightsBookMarkID').value.trim();
+					break;
+				case 'addlink':
+					if(document.getElementById('addlinkarticleurl').value.trim() == '') {
+						alert('Please provide a url adddress for article to add to Instapaper');
+						return;
+					}				
+				  baseUrl += 'addlink?url=' + encodeURIComponent(document.getElementById('addlinkarticleurl').value.trim());
+					break;
+			}
+			baseUrl += '&username=' + encodeURIComponent(document.getElementById('username').value) + '&password=' + encodeURIComponent(document.getElementById('password').value);
+
+
+		fetch(baseUrl)
+			.then(response => response.json())
+			.then(data => {
+			  document.getElementById(apiName).innerHTML  = prettyPrintJson.toHtml(data);
+			});			
+		}
+
+		const updateUserCredentials = ()=> {
+			setCookie('username', document.getElementById('username').value,60);
+			setCookie('password', document.getElementById('password').value,60);
+		}
+		const setCookie = (cname, cvalue, exdays)=> {
+			var d = new Date();
+			d.setTime(d.getTime() + (exdays*24*60*60*1000));
+			var expires = "expires="+ d.toUTCString();
+			document.cookie = encodeURIComponent(cname) + "=" + cvalue + ";" + expires + ";path=/";
+		}		
+		const getCookie = (cname)=> {
+			var name = cname + "=";
+			var decodedCookie = decodeURIComponent(document.cookie);
+			var ca = decodedCookie.split(';');
+			for(var i = 0; i <ca.length; i++) {
+				var c = ca[i];
+				while (c.charAt(0) == ' ') {
+					c = c.substring(1);
+				}
+				if (c.indexOf(name) == 0) {
+					return c.substring(name.length, c.length);
+				}
+			}
+			return "";
+		}		
+		document.addEventListener('DOMContentLoaded', ()=> {
+			document.getElementById('username').value=getCookie('username');
+			document.getElementById('password').value=getCookie('password');
+		}, false);
+	</script>
+
+</body>
+</html>
